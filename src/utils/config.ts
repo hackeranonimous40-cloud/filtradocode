@@ -6,7 +6,8 @@ import { GLOBAL_CLAUDE_FILE } from './env.js'
 import { getCwd } from './state.js'
 import { randomBytes } from 'crypto'
 import { safeParseJSON } from './json.js'
-import { checkGate, logEvent } from '../services/statsig.js'
+import { logEvent } from '../services/statsig.js'
+import { checkGate } from './betas.js'
 import { GATE_USE_EXTERNAL_UPDATER } from '../constants/betas.js'
 import { ConfigParseError } from './errors.js'
 import type { ThemeNames } from './theme.js'
@@ -192,7 +193,6 @@ export function isProjectConfigKey(key: string): key is ProjectConfigKey {
 export function saveGlobalConfig(config: GlobalConfig): void {
   if (process.env.NODE_ENV === 'test') {
     for (const key in config) {
-      // @ts-expect-error: TODO
       TEST_GLOBAL_CONFIG_FOR_TESTING[key] = config[key]
     }
     return
@@ -214,30 +214,13 @@ export function getGlobalConfig(): GlobalConfig {
   return getConfig(GLOBAL_CLAUDE_FILE, DEFAULT_GLOBAL_CONFIG)
 }
 
+export function getApiKey(): null | string {
+  return process.env.OPENAI_API_KEY ?? null
+}
+
+// Alias for backwards compatibility
 export function getAnthropicApiKey(): null | string {
-  const config = getGlobalConfig()
-
-  if (process.env.USER_TYPE === 'SWE_BENCH') {
-    return process.env.ANTHROPIC_API_KEY_OVERRIDE ?? null
-  }
-
-  if (process.env.USER_TYPE === 'external') {
-    return config.primaryApiKey ?? null
-  }
-
-  if (process.env.USER_TYPE === 'ant') {
-    if (
-      process.env.ANTHROPIC_API_KEY &&
-      config.customApiKeyResponses?.approved?.includes(
-        normalizeApiKeyForConfig(process.env.ANTHROPIC_API_KEY),
-      )
-    ) {
-      return process.env.ANTHROPIC_API_KEY
-    }
-    return config.primaryApiKey ?? null
-  }
-
-  return null
+  return getApiKey()
 }
 
 export function normalizeApiKeyForConfig(apiKey: string): string {
@@ -245,21 +228,12 @@ export function normalizeApiKeyForConfig(apiKey: string): string {
 }
 
 export function isDefaultApiKey(): boolean {
-  const config = getGlobalConfig()
-  const apiKey = getAnthropicApiKey()
-  return apiKey === config.primaryApiKey
+  return !!process.env.OPENAI_API_KEY
 }
 
 export function getCustomApiKeyStatus(
   truncatedApiKey: string,
 ): 'approved' | 'rejected' | 'new' {
-  const config = getGlobalConfig()
-  if (config.customApiKeyResponses?.approved?.includes(truncatedApiKey)) {
-    return 'approved'
-  }
-  if (config.customApiKeyResponses?.rejected?.includes(truncatedApiKey)) {
-    return 'rejected'
-  }
   return 'new'
 }
 
@@ -355,7 +329,6 @@ export function getCurrentProjectConfig(): ProjectConfig {
 export function saveCurrentProjectConfig(projectConfig: ProjectConfig): void {
   if (process.env.NODE_ENV === 'test') {
     for (const key in projectConfig) {
-      // @ts-expect-error: TODO
       TEST_PROJECT_CONFIG_FOR_TESTING[key] = projectConfig[key]
     }
     return

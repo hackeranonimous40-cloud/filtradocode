@@ -20,10 +20,12 @@ export function AssistantLocalCommandOutputMessage({
   ].filter(Boolean)
 
   if (insides.length === 0) {
+    // @ts-ignore
     insides = [<Text key="0">(No output)</Text>]
   }
 
   return [
+    // @ts-ignore
     <Box key="0" gap={1}>
       <Box>
         <Text color={theme.secondaryText}>{'  '}⎿ </Text>

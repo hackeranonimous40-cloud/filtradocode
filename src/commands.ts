@@ -18,10 +18,11 @@ import terminalSetup from './commands/terminalSetup.js'
 import { Tool, ToolUseContext } from './Tool.js'
 import resume from './commands/resume.js'
 import { getMCPCommands } from './services/mcpClient.js'
-import type { MessageParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { MessageParam } from './types/anthropic.js'
 import { memoize } from 'lodash-es'
 import type { Message } from './query.js'
 import { isAnthropicAuthEnabled } from './utils/auth.js'
+import type * as React from 'react'
 
 type PromptCommand = {
   type: 'prompt'

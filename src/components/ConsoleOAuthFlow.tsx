@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import type * as ReactNS from 'react'
 import { Static, Box, Text, useInput } from 'ink'
 import TextInput from './TextInput.js'
 import { OAuthService, createAndStoreApiKey } from '../services/oauth.js'
@@ -161,7 +162,7 @@ export function ConsoleOAuthFlow({ onDone }: Props): React.ReactNode {
 
       if (apiKey) {
         setOAuthStatus({ state: 'success', apiKey })
-        sendNotification({ message: 'Claude Code login successful' })
+        sendNotification({ message: 'OpenCarbo login successful' })
       } else {
         setOAuthStatus({
           state: 'error',
@@ -244,7 +245,7 @@ export function ConsoleOAuthFlow({ onDone }: Props): React.ReactNode {
           <Box flexDirection="column" gap={1}>
             <Box>
               <SimpleSpinner />
-              <Text>Creating API key for Claude Code…</Text>
+              <Text>Creating API key for OpenCarbo…</Text>
             </Box>
           </Box>
         )
@@ -288,7 +289,7 @@ export function ConsoleOAuthFlow({ onDone }: Props): React.ReactNode {
   // We need to render the copy-able URL statically to prevent Ink <Text> from inserting
   // newlines in the middle of the URL (this breaks Safari). Because <Static> components are
   // only rendered once top-to-bottom, we also need to make everything above the URL static.
-  const staticItems: Record<string, JSX.Element> = {}
+  const staticItems: Record<string, ReactNS.ReactElement> = {}
   if (!isClearing) {
     staticItems.header = (
       <Box key="header" flexDirection="column" gap={1}>

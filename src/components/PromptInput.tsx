@@ -206,6 +206,7 @@ function PromptInput({
           messageLogName,
           tools,
           verbose,
+          dangerouslySkipPermissions: false,
           slowAndCapableModel: model,
           maxThinkingTokens: 0,
         },

@@ -7,7 +7,7 @@ import { env } from '../utils/env.js'
 import { getCwd } from '../utils/state.js'
 import * as path from 'path'
 import { mapValues } from 'lodash-es'
-import type { ContentBlock } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ContentBlock, TextBlock, ToolUseBlock } from '../types/anthropic.js'
 
 export async function withVCR(
   messages: (UserMessage | AssistantMessage)[],
@@ -110,7 +110,7 @@ function mapAssistantMessage(
     uuid: 'UUID' as unknown as UUID,
     message: {
       ...message.message,
-      content: message.message.content
+      content: (message.message.content as ContentBlock[])
         .map(_ => {
           switch (_.type) {
             case 'text':
@@ -128,7 +128,7 @@ function mapAssistantMessage(
               return _ // Handle other block types unchanged
           }
         })
-        .filter(Boolean) as ContentBlock[],
+        .filter(Boolean) as unknown as (TextBlock | ToolUseBlock)[],
     },
     type: 'assistant',
   }

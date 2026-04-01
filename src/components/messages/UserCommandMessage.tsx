@@ -2,7 +2,7 @@ import { Box, Text } from 'ink'
 import * as React from 'react'
 import { getTheme } from '../../utils/theme.js'
 import { extractTag } from '../../utils/messages.js'
-import { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import { TextBlockParam } from '../../types/anthropic.js'
 
 type Props = {
   addMargin: boolean

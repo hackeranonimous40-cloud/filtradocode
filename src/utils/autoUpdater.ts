@@ -1,5 +1,6 @@
 import { homedir } from 'os'
 import { join } from 'path'
+import { MACRO } from '../constants/macros.js'
 import {
   existsSync,
   mkdirSync,
@@ -49,7 +50,7 @@ export async function assertMinVersion(): Promise<void> {
       lt(MACRO.VERSION, versionConfig.minVersion)
     ) {
       console.error(`
-It looks like your version of Claude Code (${MACRO.VERSION}) needs an update.
+It looks like your version of OpenCarbo (${MACRO.VERSION}) needs an update.
 A newer version (${versionConfig.minVersion} or higher) is required to continue.
 
 To update, please run:

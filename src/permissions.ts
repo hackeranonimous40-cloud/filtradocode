@@ -90,7 +90,7 @@ export const bashToolHasPermission = async (
     // This is NOT the same as `fullCommandPrefix.commandPrefix === null`, which means no prefix was detected
     return {
       result: false,
-      message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`,
+      message: `OpenCarbo requested permissions to use ${tool.name}, but you haven't granted it yet.`,
     }
   }
 
@@ -101,7 +101,7 @@ export const bashToolHasPermission = async (
     } else {
       return {
         result: false,
-        message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`,
+        message: `OpenCarbo requested permissions to use ${tool.name}, but you haven't granted it yet.`,
       }
     }
   }
@@ -120,7 +120,7 @@ export const bashToolHasPermission = async (
     } else {
       return {
         result: false,
-        message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`,
+        message: `OpenCarbo requested permissions to use ${tool.name}, but you haven't granted it yet.`,
       }
     }
   }
@@ -145,7 +145,7 @@ export const bashToolHasPermission = async (
   }
   return {
     result: false,
-    message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`,
+    message: `OpenCarbo requested permissions to use ${tool.name}, but you haven't granted it yet.`,
   }
 }
 
@@ -203,7 +203,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
       }
       return {
         result: false,
-        message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`,
+        message: `OpenCarbo requested permissions to use ${tool.name}, but you haven't granted it yet.`,
       }
     }
     // For other tools, check persistent permissions
@@ -215,7 +215,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
 
       return {
         result: false,
-        message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`,
+        message: `OpenCarbo requested permissions to use ${tool.name}, but you haven't granted it yet.`,
       }
     }
   }

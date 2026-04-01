@@ -10,7 +10,7 @@ export function MCPServerDialogCopy(): React.ReactNode {
         code, make network requests, or access system resources via tool calls.
         All tool calls will require your explicit approval before execution. For
         more information, see{' '}
-        <Link url="https://docs.anthropic.com/s/claude-code-mcp">
+        <Link url="https://docs.anthropic.com/s/OpenCarbo">
           MCP documentation
         </Link>
       </Text>

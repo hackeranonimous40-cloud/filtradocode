@@ -9,9 +9,9 @@ import { getTheme } from '../utils/theme.js'
 import { logEvent } from '../services/statsig.js'
 import { logError } from '../utils/log.js'
 import {
-  AnimatedClaudeAsterisk,
-  ClaudeAsteriskSize,
-} from './AnimatedClaudeAsterisk.js'
+  AnimatedOpenCarboAsterisk,
+  OpenCarboAsteriskSize,
+} from './AnimatedOpenCarboAsterisk.js'
 import { useTerminalSize } from '../hooks/useTerminalSize.js'
 
 export type FormData = {
@@ -42,7 +42,7 @@ export function StickerRequestForm({
   // Determine the appropriate asterisk size based on terminal height
   // Small ASCII art is 5 lines tall, large is 22 lines
   // Need to account for the form content too which needs about 18-22 lines minimum
-  const getAsteriskSize = (): ClaudeAsteriskSize => {
+  const getAsteriskSize = (): OpenCarboAsteriskSize => {
     // Large terminals (can fit large ASCII art + form content comfortably)
     if (rows >= 50) {
       return 'large'
@@ -57,7 +57,7 @@ export function StickerRequestForm({
     }
   }
 
-  // Animation logic is now handled by the AnimatedClaudeAsterisk component
+  // Animation logic is now handled by the AnimatedOpenCarboAsterisk component
 
   // Function to generate Google Form URL
   const generateGoogleFormURL = (data: FormData) => {
@@ -300,7 +300,7 @@ export function StickerRequestForm({
       </Box>
       {!showingSummary && (
         <Box justifyContent="center">
-          <AnimatedClaudeAsterisk
+          <AnimatedOpenCarboAsterisk
             size={getAsteriskSize()}
             cycles={getAsteriskSize() === 'large' ? 4 : undefined}
           />

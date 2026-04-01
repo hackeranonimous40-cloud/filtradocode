@@ -1,7 +1,7 @@
 import type {
   ImageBlockParam,
   TextBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+} from '../../types/anthropic.js'
 
 import { existsSync, readFileSync } from 'fs'
 import { Text } from 'ink'
@@ -33,7 +33,7 @@ const inputSchema = z.strictObject({
     ),
 })
 
-type In = typeof inputSchema
+type In = z.infer<typeof inputSchema>
 type Out = NotebookCellSource[]
 
 function renderResultForAssistant(data: NotebookCellSource[]) {
@@ -181,7 +181,7 @@ function processOutput(output: NotebookCellOutput) {
     case 'display_data':
       return {
         output_type: output.output_type,
-        text: processOutputText(output.data?.['text/plain']),
+        text: processOutputText(output.data?.['text/plain'] as string | string[] | undefined),
         image: output.data && extractImage(output.data),
       }
     case 'error':
@@ -201,6 +201,7 @@ function processCell(
 ): NotebookCellSource {
   const cellData: NotebookCellSource = {
     cell: index,
+    cell_type: cell.cell_type,
     cellType: cell.cell_type,
     source: Array.isArray(cell.source) ? cell.source.join('') : cell.source,
     language,

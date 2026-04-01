@@ -1,13 +1,8 @@
-#!/usr/bin/env -S node --no-warnings=ExperimentalWarning --enable-source-maps
+#!/usr/bin/env -S bun
 import { initSentry } from '../services/sentry.js'
 import { PRODUCT_NAME } from '../constants/product.js'
-initSentry() // Initialize Sentry as early as possible
-
-// XXX: Without this line (and the Object.keys, even though it seems like it does nothing!),
-// there is a bug in Bun only on Win32 that causes this import to be removed, even though
-// its use is solely because of its side-effects.
-import * as dontcare from '@anthropic-ai/sdk/shims/node'
-Object.keys(dontcare)
+import { MACRO } from '../constants/macros.js'
+initSentry()
 
 import React from 'react'
 import { ReadStream } from 'tty'
@@ -25,8 +20,6 @@ import {
   getCurrentProjectConfig,
   saveGlobalConfig,
   saveCurrentProjectConfig,
-  getCustomApiKeyStatus,
-  normalizeApiKeyForConfig,
   setConfigForCLI,
   deleteConfigForCLI,
   getConfigForCLI,
@@ -37,7 +30,6 @@ import { cwd } from 'process'
 import { dateToFilename, logError, parseLogFilename } from '../utils/log.js'
 import { Onboarding } from '../components/Onboarding.js'
 import { Doctor } from '../screens/Doctor.js'
-import { ApproveApiKey } from '../components/ApproveApiKey.js'
 import { TrustDialog } from '../components/TrustDialog.js'
 import { checkHasTrustDialogAccepted } from '../utils/config.js'
 import { isDefaultSlowAndCapableModel } from '../utils/model.js'
@@ -65,21 +57,16 @@ import {
   ensureConfigScope,
 } from '../services/mcpClient.js'
 import { handleMcprcServerApprovals } from '../services/mcpServerApproval.js'
-import { checkGate, initializeStatsig, logEvent } from '../services/statsig.js'
+import { initializeStatsig, logEvent } from '../services/statsig.js'
 import { getExampleCommands } from '../utils/exampleCommands.js'
 import { cursorShow } from 'ansi-escapes'
-import {
-  getLatestVersion,
-  installGlobalPackage,
-  assertMinVersion,
-} from '../utils/autoUpdater.js'
 import { CACHE_PATHS } from '../utils/log.js'
 import { PersistentShell } from '../utils/PersistentShell.js'
-import { GATE_USE_EXTERNAL_UPDATER } from '../constants/betas.js'
 import { clearTerminal } from '../utils/terminal.js'
 import { showInvalidConfigDialog } from '../components/InvalidConfigDialog.js'
 import { ConfigParseError } from '../utils/errors.js'
 import { grantReadPermissionForOriginalDir } from '../utils/permissions/filesystem.js'
+import chalk from 'chalk'
 
 export function completeOnboarding(): void {
   const config = getGlobalConfig()
@@ -101,7 +88,7 @@ async function showSetupScreens(
   const config = getGlobalConfig()
   if (
     !config.theme ||
-    !config.hasCompletedOnboarding // always show onboarding at least once
+    !config.hasCompletedOnboarding
   ) {
     await clearTerminal()
     await new Promise<void>(resolve => {
@@ -120,36 +107,10 @@ async function showSetupScreens(
     })
   }
 
-  // Check for custom API key (only allowed for ants)
-  if (process.env.ANTHROPIC_API_KEY && process.env.USER_TYPE === 'ant') {
-    const customApiKeyTruncated = normalizeApiKeyForConfig(
-      process.env.ANTHROPIC_API_KEY!,
-    )
-    const keyStatus = getCustomApiKeyStatus(customApiKeyTruncated)
-    if (keyStatus === 'new') {
-      await new Promise<void>(resolve => {
-        render(
-          <ApproveApiKey
-            customApiKeyTruncated={customApiKeyTruncated}
-            onDone={async () => {
-              await clearTerminal()
-              resolve()
-            }}
-          />,
-          {
-            exitOnCtrlC: false,
-          },
-        )
-      })
-    }
-  }
-
-  // In non-interactive or dangerously-skip-permissions mode, skip the trust dialog
   if (!print && !dangerouslySkipPermissions) {
     if (!checkHasTrustDialogAccepted()) {
       await new Promise<void>(resolve => {
         const onDone = () => {
-          // Grant read permission to the current working directory
           grantReadPermissionForOriginalDir()
           resolve()
         }
@@ -157,11 +118,6 @@ async function showSetupScreens(
           exitOnCtrlC: false,
         })
       })
-    }
-
-    // After trust dialog, check for any mcprc servers that need approval
-    if (process.env.USER_TYPE === 'ant') {
-      await handleMcprcServerApprovals()
     }
   }
 }
@@ -178,15 +134,10 @@ async function setup(
   cwd: string,
   dangerouslySkipPermissions?: boolean,
 ): Promise<void> {
-  // Don't await so we don't block startup
   setCwd(cwd)
-
-  // Always grant read permissions for original working dir
   grantReadPermissionForOriginalDir()
 
-  // If --dangerously-skip-permissions is set, verify we're in a safe environment
   if (dangerouslySkipPermissions) {
-    // Check if running as root/sudo on Unix-like systems
     if (
       process.platform !== 'win32' &&
       typeof process.getuid === 'function' &&
@@ -198,7 +149,6 @@ async function setup(
       process.exit(1)
     }
 
-    // Only await if --dangerously-skip-permissions is set
     const [isDocker, hasInternet] = await Promise.all([
       env.getIsDocker(),
       env.hasInternetAccess(),
@@ -217,11 +167,10 @@ async function setup(
   }
 
   cleanupOldMessageFilesInBackground()
-  getExampleCommands() // Pre-fetch example commands
-  getContext() // Pre-fetch all context data at once
-  initializeStatsig() // Kick off statsig initialization
+  getExampleCommands()
+  getContext()
+  initializeStatsig()
 
-  // Migrate old iterm2KeyBindingInstalled config to new shiftEnterKeyBindingInstalled
   const globalConfig = getGlobalConfig()
   if (
     globalConfig.iterm2KeyBindingInstalled === true &&
@@ -231,12 +180,10 @@ async function setup(
       ...globalConfig,
       shiftEnterKeyBindingInstalled: true,
     }
-    // Remove the old config property
     delete updatedConfig.iterm2KeyBindingInstalled
     saveGlobalConfig(updatedConfig)
   }
 
-  // Check for last session's cost and duration
   const projectConfig = getCurrentProjectConfig()
   if (
     projectConfig.lastCost !== undefined &&
@@ -248,7 +195,6 @@ async function setup(
       last_session_duration: String(projectConfig.lastDuration),
       last_session_id: projectConfig.lastSessionId,
     })
-    // Clear the values after logging
     saveCurrentProjectConfig({
       ...projectConfig,
       lastCost: undefined,
@@ -258,7 +204,6 @@ async function setup(
     })
   }
 
-  // Check auto-updater permissions
   const autoUpdaterStatus = globalConfig.autoUpdaterStatus ?? 'not_configured'
   if (autoUpdaterStatus === 'not_configured') {
     logEvent('tengu_setup_auto_updater_not_configured', {})
@@ -269,20 +214,27 @@ async function setup(
 }
 
 async function main() {
-  // Validate configs are valid and enable configuration system
+  if (!process.env.OPENAI_API_KEY) {
+    console.error(
+      chalk.red('Error: OPENAI_API_KEY environment variable is required.')
+    )
+    console.error('Set it with: export OPENAI_API_KEY=your-key-here')
+    process.exit(1)
+  }
+
   try {
     enableConfigs()
   } catch (error: unknown) {
     if (error instanceof ConfigParseError) {
-      // Show the invalid config dialog with the error object
       await showInvalidConfigDialog({ error })
-      return // Exit after handling the config error
+      return
     }
   }
 
   let inputPrompt = ''
   let renderContext: RenderOptions | undefined = {
     exitOnCtrlC: false,
+    // @ts-ignore
     onFlicker() {
       logEvent('tengu_flicker', {})
     },
@@ -291,7 +243,6 @@ async function main() {
   if (
     !process.stdin.isTTY &&
     !process.env.CI &&
-    // Input hijacking breaks MCP.
     !process.argv.includes('mcp')
   ) {
     inputPrompt = await stdin()
@@ -318,10 +269,8 @@ async function parseArgs(
     exitOnCtrlC: true,
   }
 
-  // Get the initial list of commands filtering based on user type
   const commands = await getCommands()
 
-  // Format command list for help text (using same filter as in help.ts)
   const commandList = commands
     .filter(cmd => !cmd.isHidden)
     .map(cmd => `/${cmd.name} - ${cmd.description}`)
@@ -378,8 +327,6 @@ ${commandList}`,
         })
         await setup(cwd, dangerouslySkipPermissions)
 
-        assertMinVersion()
-
         const [tools, mcpClients] = await Promise.all([
           getTools(
             enableArchitect ?? getCurrentProjectConfig().enableArchitectTool,
@@ -431,24 +378,6 @@ ${commandList}`,
     )
     .version(MACRO.VERSION, '-v, --version')
 
-  // Enable melon mode for ants if --melon is passed
-  // For bun tree shaking to work, this has to be a top level --define, not inside MACRO
-  if (process.env.USER_TYPE === 'ant') {
-    program
-      .option('--melon', 'Enable melon mode')
-      .hook('preAction', async () => {
-        if ((program.opts() as { melon?: boolean }).melon) {
-          const { runMelonWrapper } = await import('../utils/melonWrapper.js')
-          const melonArgs = process.argv.slice(
-            process.argv.indexOf('--melon') + 1,
-          )
-          const exitCode = runMelonWrapper(melonArgs)
-          process.exit(exitCode)
-        }
-      })
-  }
-
-  // claude config
   const config = program
     .command('config')
     .description('Manage configuration (eg. claude config set -g theme dark)')
@@ -496,12 +425,10 @@ ${commandList}`,
     .action(async ({ cwd, global }) => {
       await setup(cwd, false)
       console.log(
-        JSON.stringify(listConfigForCLI((global as true) ?? false), null, 2),
+        JSON.stringify(listConfigForCLI(global as never), null, 2),
       )
       process.exit(0)
     })
-
-  // claude approved-tools
 
   const allowedTools = program
     .command('approved-tools')
@@ -529,8 +456,6 @@ ${commandList}`,
       process.exit(result.success ? 0 : 1)
     })
 
-  // claude mcp
-
   const mcp = program
     .command('mcp')
     .description('Configure and manage MCP servers')
@@ -542,7 +467,6 @@ ${commandList}`,
       const providedCwd = (program.opts() as { cwd?: string }).cwd ?? cwd()
       logEvent('tengu_mcp_start', { providedCwd })
 
-      // Verify the directory exists
       if (!existsSync(providedCwd)) {
         console.error(`Error: Directory ${providedCwd} does not exist`)
         process.exit(1)
@@ -556,32 +480,6 @@ ${commandList}`,
         process.exit(1)
       }
     })
-
-  if (process.env.USER_TYPE === 'ant') {
-    mcp
-      .command('add-sse <name> <url>')
-      .description('Add an SSE server')
-      .option(
-        '-s, --scope <scope>',
-        'Configuration scope (project or global)',
-        'project',
-      )
-      .action(async (name, url, options) => {
-        try {
-          const scope = ensureConfigScope(options.scope)
-          logEvent('tengu_mcp_add', { name, type: 'sse', scope })
-
-          addMcpServer(name, { type: 'sse', url }, scope)
-          console.log(
-            `Added SSE MCP server ${name} with URL ${url} to ${scope} config`,
-          )
-          process.exit(0)
-        } catch (error) {
-          console.error((error as Error).message)
-          process.exit(1)
-        }
-      })
-  }
 
   mcp
     .command('add <name> <command> [args...]')
@@ -689,34 +587,9 @@ ${commandList}`,
       process.exit(0)
     })
 
-  if (process.env.USER_TYPE === 'ant') {
-    mcp
-      .command('reset-mcprc-choices')
-      .description(
-        'Reset all approved and rejected .mcprc servers for this project',
-      )
-      .action(() => {
-        logEvent('tengu_mcp_reset_mcprc_choices', {})
-        const config = getCurrentProjectConfig()
-        saveCurrentProjectConfig({
-          ...config,
-          approvedMcprcServers: [],
-          rejectedMcprcServers: [],
-        })
-        console.log(
-          'All .mcprc server approvals and rejections have been reset.',
-        )
-        console.log(
-          'You will be prompted for approval next time you start Claude Code.',
-        )
-        process.exit(0)
-      })
-  }
-
-  // Doctor command - check installation health
   program
     .command('doctor')
-    .description('Check the health of your Claude Code auto-updater')
+    .description('Check the health of your installation')
     .action(async () => {
       logEvent('tengu_doctor_command', {})
 
@@ -726,292 +599,221 @@ ${commandList}`,
       process.exit(0)
     })
 
-  // ant-only commands
-  if (process.env.USER_TYPE === 'ant') {
-    // claude update
-    program
-      .command('update')
-      .description('Check for updates and install if available')
-      .action(async () => {
-        const useExternalUpdater = await checkGate(GATE_USE_EXTERNAL_UPDATER)
-        if (useExternalUpdater) {
-          // The external updater intercepts calls to "claude update", which means if we have received
-          // this command at all, the extenral updater isn't installed on this machine.
-          console.log('This version of Claude Code is no longer supported.')
-          process.exit(0)
-        }
-
-        logEvent('tengu_update_check', {})
-        console.log(`Current version: ${MACRO.VERSION}`)
-        console.log('Checking for updates...')
-
-        const latestVersion = await getLatestVersion()
-
-        if (!latestVersion) {
-          console.error('Failed to check for updates')
-          process.exit(1)
-        }
-
-        if (latestVersion === MACRO.VERSION) {
-          console.log(`${PRODUCT_NAME} is up to date`)
-          process.exit(0)
-        }
-
-        console.log(`New version available: ${latestVersion}`)
-        console.log('Installing update...')
-
-        const status = await installGlobalPackage()
-
-        switch (status) {
-          case 'success':
-            console.log(`Successfully updated to version ${latestVersion}`)
-            break
-          case 'no_permissions':
-            console.error('Error: Insufficient permissions to install update')
-            console.error('Try running with sudo or fix npm permissions')
-            process.exit(1)
-            break
-          case 'install_failed':
-            console.error('Error: Failed to install update')
-            process.exit(1)
-            break
-          case 'in_progress':
-            console.error(
-              'Error: Another instance is currently performing an update',
-            )
-            console.error('Please wait and try again later')
-            process.exit(1)
-            break
-        }
-        process.exit(0)
-      })
-
-    // claude log
-    program
-      .command('log')
-      .description('Manage conversation logs.')
-      .argument(
-        '[number]',
-        'A number (0, 1, 2, etc.) to display a specific log',
-        parseInt,
+  program
+    .command('log')
+    .description('Manage conversation logs.')
+    .argument(
+      '[number]',
+      'A number (0, 1, 2, etc.) to display a specific log',
+      parseInt,
+    )
+    .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
+    .action(async (number, { cwd }) => {
+      await setup(cwd, false)
+      logEvent('tengu_view_logs', { number: number?.toString() ?? '' })
+      const context: { unmount?: () => void } = {}
+      const { unmount } = render(
+        <LogList context={context} type="messages" logNumber={number} />,
+        renderContextWithExitOnCtrlC,
       )
-      .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
-      .action(async (number, { cwd }) => {
-        await setup(cwd, false)
-        logEvent('tengu_view_logs', { number: number?.toString() ?? '' })
-        const context: { unmount?: () => void } = {}
-        const { unmount } = render(
-          <LogList context={context} type="messages" logNumber={number} />,
-          renderContextWithExitOnCtrlC,
-        )
-        context.unmount = unmount
-      })
+      context.unmount = unmount
+    })
 
-    // claude resume
-    program
-      .command('resume')
-      .description(
-        'Resume a previous conversation. Optionally provide a number (0, 1, 2, etc.) or file path to resume a specific conversation.',
-      )
-      .argument(
-        '[identifier]',
-        'A number (0, 1, 2, etc.) or file path to resume a specific conversation',
-      )
-      .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
-      .option(
-        '-ea, --enable-architect',
-        'Enable the Architect tool',
-        () => true,
-      )
-      .option('-v, --verbose', 'Do not truncate message output', () => true)
-      .option(
-        '--dangerously-skip-permissions',
-        'Skip all permission checks. Only works in Docker containers with no internet access. Will crash otherwise.',
-        () => true,
-      )
-      .action(
-        async (
-          identifier,
-          { cwd, enableArchitect, dangerouslySkipPermissions, verbose },
-        ) => {
-          await setup(cwd, dangerouslySkipPermissions)
-          assertMinVersion()
+  program
+    .command('resume')
+    .description(
+      'Resume a previous conversation. Optionally provide a number (0, 1, 2, etc.) or file path to resume a specific conversation.',
+    )
+    .argument(
+      '[identifier]',
+      'A number (0, 1, 2, etc.) or file path to resume a specific conversation',
+    )
+    .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
+    .option(
+      '-ea, --enable-architect',
+      'Enable the Architect tool',
+      () => true,
+    )
+    .option('-v, --verbose', 'Do not truncate message output', () => true)
+    .option(
+      '--dangerously-skip-permissions',
+      'Skip all permission checks. Only works in Docker containers with no internet access. Will crash otherwise.',
+      () => true,
+    )
+    .action(
+      async (
+        identifier,
+        { cwd, enableArchitect, dangerouslySkipPermissions, verbose },
+      ) => {
+        await setup(cwd, dangerouslySkipPermissions)
 
-          const [tools, commands, logs, mcpClients] = await Promise.all([
-            getTools(
-              enableArchitect ?? getCurrentProjectConfig().enableArchitectTool,
-            ),
-            getCommands(),
-            loadLogList(CACHE_PATHS.messages()),
-            getClients(),
-          ])
-          logStartup()
+        const [tools, commands, logs, mcpClients] = await Promise.all([
+          getTools(
+            enableArchitect ?? getCurrentProjectConfig().enableArchitectTool,
+          ),
+          getCommands(),
+          loadLogList(CACHE_PATHS.messages()),
+          getClients(),
+        ])
+        logStartup()
 
-          // If a specific conversation is requested, load and resume it directly
-          if (identifier !== undefined) {
-            // Check if identifier is a number or a file path
-            const number = Math.abs(parseInt(identifier))
-            const isNumber = !isNaN(number)
-            let messages, date, forkNumber
-            try {
-              if (isNumber) {
-                logEvent('tengu_resume', { number: number.toString() })
-                const log = logs[number]
-                if (!log) {
-                  console.error('No conversation found at index', number)
-                  process.exit(1)
-                }
-                messages = await loadMessagesFromLog(log.fullPath, tools)
-                ;({ date, forkNumber } = log)
-              } else {
-                // Handle file path case
-                logEvent('tengu_resume', { filePath: identifier })
-                if (!existsSync(identifier)) {
-                  console.error('File does not exist:', identifier)
-                  process.exit(1)
-                }
-                messages = await loadMessagesFromLog(identifier, tools)
-                const pathSegments = identifier.split('/')
-                const filename =
-                  pathSegments[pathSegments.length - 1] ?? 'unknown'
-                ;({ date, forkNumber } = parseLogFilename(filename))
+        if (identifier !== undefined) {
+          const number = Math.abs(parseInt(identifier))
+          const isNumber = !isNaN(number)
+          let messages, date, forkNumber
+          try {
+            if (isNumber) {
+              logEvent('tengu_resume', { number: number.toString() })
+              const log = logs[number]
+              if (!log) {
+                console.error('No conversation found at index', number)
+                process.exit(1)
               }
-              const fork = getNextAvailableLogForkNumber(
-                date,
-                forkNumber ?? 1,
-                0,
-              )
-              const isDefaultModel = await isDefaultSlowAndCapableModel()
-              render(
-                <REPL
-                  initialPrompt=""
-                  messageLogName={date}
-                  initialForkNumber={fork}
-                  shouldShowPromptInput={true}
-                  verbose={verbose}
-                  commands={commands}
-                  tools={tools}
-                  initialMessages={messages}
-                  mcpClients={mcpClients}
-                  isDefaultModel={isDefaultModel}
-                />,
-                { exitOnCtrlC: false },
-              )
-            } catch (error) {
-              logError(`Failed to load conversation: ${error}`)
-              process.exit(1)
+              messages = await loadMessagesFromLog(log.fullPath, tools)
+              ;({ date, forkNumber } = log)
+            } else {
+              logEvent('tengu_resume', { filePath: identifier })
+              if (!existsSync(identifier)) {
+                console.error('File does not exist:', identifier)
+                process.exit(1)
+              }
+              messages = await loadMessagesFromLog(identifier, tools)
+              const pathSegments = identifier.split('/')
+              const filename =
+                pathSegments[pathSegments.length - 1] ?? 'unknown'
+              ;({ date, forkNumber } = parseLogFilename(filename))
             }
-          } else {
-            // Show the conversation selector UI
-            const context: { unmount?: () => void } = {}
-            const { unmount } = render(
-              <ResumeConversation
-                context={context}
-                commands={commands}
-                logs={logs}
-                tools={tools}
-                verbose={verbose}
-              />,
-              renderContextWithExitOnCtrlC,
+            const fork = getNextAvailableLogForkNumber(
+              date,
+              forkNumber ?? 1,
+              0,
             )
-            context.unmount = unmount
+            const isDefaultModel = await isDefaultSlowAndCapableModel()
+            render(
+              <REPL
+                initialPrompt=""
+                messageLogName={date}
+                initialForkNumber={fork}
+                shouldShowPromptInput={true}
+                verbose={verbose}
+                commands={commands}
+                tools={tools}
+                initialMessages={messages}
+                mcpClients={mcpClients}
+                isDefaultModel={isDefaultModel}
+              />,
+              { exitOnCtrlC: false },
+            )
+          } catch (error) {
+            logError(`Failed to load conversation: ${error}`)
+            process.exit(1)
           }
-        },
+        } else {
+          const context: { unmount?: () => void } = {}
+          const { unmount } = render(
+            <ResumeConversation
+              context={context}
+              commands={commands}
+              logs={logs}
+              tools={tools}
+              verbose={verbose}
+            />,
+            renderContextWithExitOnCtrlC,
+          )
+          context.unmount = unmount
+        }
+      },
+    )
+
+  program
+    .command('error')
+    .description(
+      'View error logs. Optionally provide a number (0, -1, -2, etc.) to display a specific log.',
+    )
+    .argument(
+      '[number]',
+      'A number (0, 1, 2, etc.) to display a specific log',
+      parseInt,
+    )
+    .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
+    .action(async (number, { cwd }) => {
+      await setup(cwd, false)
+      logEvent('tengu_view_errors', { number: number?.toString() ?? '' })
+      const context: { unmount?: () => void } = {}
+      const { unmount } = render(
+        <LogList context={context} type="errors" logNumber={number} />,
+        renderContextWithExitOnCtrlC,
       )
+      context.unmount = unmount
+    })
 
-    // claude error
-    program
-      .command('error')
-      .description(
-        'View error logs. Optionally provide a number (0, -1, -2, etc.) to display a specific log.',
+  const context = program
+    .command('context')
+    .description(
+      'Set static context (eg. claude context add-file ./src/*.py)',
+    )
+
+  context
+    .command('get <key>')
+    .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
+    .description('Get a value from context')
+    .action(async (key, { cwd }) => {
+      await setup(cwd, false)
+      logEvent('tengu_context_get', { key })
+      const context = omit(
+        await getContext(),
+        'codeStyle',
+        'directoryStructure',
       )
-      .argument(
-        '[number]',
-        'A number (0, 1, 2, etc.) to display a specific log',
-        parseInt,
+      console.log(context[key])
+      process.exit(0)
+    })
+
+  context
+    .command('set <key> <value>')
+    .description('Set a value in context')
+    .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
+    .action(async (key, value, { cwd }) => {
+      await setup(cwd, false)
+      logEvent('tengu_context_set', { key })
+      setContext(key, value)
+      console.log(`Set context.${key} to "${value}"`)
+      process.exit(0)
+    })
+
+  context
+    .command('list')
+    .description('List all context values')
+    .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
+    .action(async ({ cwd }) => {
+      await setup(cwd, false)
+      logEvent('tengu_context_list', {})
+      const context = omit(
+        await getContext(),
+        'codeStyle',
+        'directoryStructure',
+        'gitStatus',
       )
-      .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
-      .action(async (number, { cwd }) => {
-        await setup(cwd, false)
-        logEvent('tengu_view_errors', { number: number?.toString() ?? '' })
-        const context: { unmount?: () => void } = {}
-        const { unmount } = render(
-          <LogList context={context} type="errors" logNumber={number} />,
-          renderContextWithExitOnCtrlC,
-        )
-        context.unmount = unmount
-      })
+      console.log(JSON.stringify(context, null, 2))
+      process.exit(0)
+    })
 
-    // claude context (TODO: deprecate)
-    const context = program
-      .command('context')
-      .description(
-        'Set static context (eg. claude context add-file ./src/*.py)',
-      )
-
-    context
-      .command('get <key>')
-      .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
-      .description('Get a value from context')
-      .action(async (key, { cwd }) => {
-        await setup(cwd, false)
-        logEvent('tengu_context_get', { key })
-        const context = omit(
-          await getContext(),
-          'codeStyle',
-          'directoryStructure',
-        )
-        console.log(context[key])
-        process.exit(0)
-      })
-
-    context
-      .command('set <key> <value>')
-      .description('Set a value in context')
-      .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
-      .action(async (key, value, { cwd }) => {
-        await setup(cwd, false)
-        logEvent('tengu_context_set', { key })
-        setContext(key, value)
-        console.log(`Set context.${key} to "${value}"`)
-        process.exit(0)
-      })
-
-    context
-      .command('list')
-      .description('List all context values')
-      .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
-      .action(async ({ cwd }) => {
-        await setup(cwd, false)
-        logEvent('tengu_context_list', {})
-        const context = omit(
-          await getContext(),
-          'codeStyle',
-          'directoryStructure',
-          'gitStatus',
-        )
-        console.log(JSON.stringify(context, null, 2))
-        process.exit(0)
-      })
-
-    context
-      .command('remove <key>')
-      .description('Remove a value from context')
-      .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
-      .action(async (key, { cwd }) => {
-        await setup(cwd, false)
-        logEvent('tengu_context_delete', { key })
-        removeContext(key)
-        console.log(`Removed context.${key}`)
-        process.exit(0)
-      })
-  }
+  context
+    .command('remove <key>')
+    .description('Remove a value from context')
+    .option('-c, --cwd <cwd>', 'The current working directory', String, cwd())
+    .action(async (key, { cwd }) => {
+      await setup(cwd, false)
+      logEvent('tengu_context_delete', { key })
+      removeContext(key)
+      console.log(`Removed context.${key}`)
+      process.exit(0)
+    })
 
   await program.parseAsync(process.argv)
   return program
 }
 
-// TODO: stream?
 async function stdin() {
   if (process.stdin.isTTY) {
     return ''

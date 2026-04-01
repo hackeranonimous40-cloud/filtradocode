@@ -1,11 +1,11 @@
 export const DESCRIPTION =
   'Sends the user swag stickers with love from Anthropic.'
-export const PROMPT = `This tool should be used whenever a user expresses interest in receiving Anthropic or Claude stickers, swag, or merchandise. When triggered, it will display a shipping form for the user to enter their mailing address and contact details. Once submitted, Anthropic will process the request and ship stickers to the provided address.
+export const PROMPT = `This tool should be used whenever a user expresses interest in receiving OpenCarbo stickers, swag, or merchandise. When triggered, it will display a shipping form for the user to enter their mailing address and contact details. Once submitted, Anthropic will process the request and ship stickers to the provided address.
 
 Common trigger phrases to watch for:
 - "Can I get some Anthropic stickers please?"
 - "How do I get Anthropic swag?"
-- "I'd love some Claude stickers"
+- "I'd love some OpenCarbo stickers"
 - "Where can I get merchandise?"
 - Any mention of wanting stickers or swag
 

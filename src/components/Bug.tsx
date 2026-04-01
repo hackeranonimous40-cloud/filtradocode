@@ -13,12 +13,13 @@ import { getAnthropicApiKey } from '../utils/config.js'
 import { USER_AGENT } from '../utils/http.js'
 import { logEvent } from '../services/statsig.js'
 import { PRODUCT_NAME } from '../constants/product.js'
+import { MACRO } from '../constants/macros.js'
 import { API_ERROR_MESSAGE_PREFIX, queryHaiku } from '../services/claude.js'
 import { openBrowser } from '../utils/browser.js'
 import { useExitOnCtrlCD } from '../hooks/useExitOnCtrlCD.js'
 
 const GITHUB_ISSUES_REPO_URL =
-  'https://github.com/anthropics/claude-code/issues'
+  'https://github.com/opencarbo/issues'
 
 type Props = {
   onDone(result: string): void

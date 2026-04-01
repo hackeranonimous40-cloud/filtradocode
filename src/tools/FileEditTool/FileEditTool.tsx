@@ -30,7 +30,7 @@ const inputSchema = z.strictObject({
   new_string: z.string().describe('The text to replace it with'),
 })
 
-export type In = typeof inputSchema
+export type In = z.infer<typeof inputSchema>
 
 // Number of lines of context to include before/after the change in our result message
 const N_LINES_SNIPPET = 4

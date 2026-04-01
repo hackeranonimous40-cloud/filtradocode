@@ -1,4 +1,4 @@
-import { TextBlock } from '@anthropic-ai/sdk/resources/index.mjs'
+import { TextBlock } from '../../types/anthropic.js'
 import chalk from 'chalk'
 import { last, memoize } from 'lodash-es'
 import { EOL } from 'os'
@@ -93,7 +93,7 @@ export const AgentTool = {
           forkNumber,
           messageLogName,
           tools,
-          commands: [],
+          commands: [] as any[],
           verbose,
           slowAndCapableModel,
           maxThinkingTokens,
@@ -204,5 +204,8 @@ export const AgentTool = {
   },
   renderToolUseRejectedMessage() {
     return <FallbackToolUseRejectedMessage />
+  },
+  renderToolResultMessage() {
+    return null
   },
 } satisfies Tool<typeof inputSchema, TextBlock[]>

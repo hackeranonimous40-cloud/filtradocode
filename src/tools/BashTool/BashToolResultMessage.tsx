@@ -1,6 +1,7 @@
 import { Box, Text } from 'ink'
 import { OutputLine } from './OutputLine.js'
 import React from 'react'
+import type * as ReactNS from 'react'
 import { getTheme } from '../../utils/theme.js'
 import { Out as BashOut } from './BashTool.js'
 
@@ -9,7 +10,7 @@ type Props = {
   verbose: boolean
 }
 
-function BashToolResultMessage({ content, verbose }: Props): JSX.Element {
+function BashToolResultMessage({ content, verbose }: Props): ReactNS.ReactElement {
   const { stdout, stdoutLines, stderr, stderrLines } = content
 
   return (

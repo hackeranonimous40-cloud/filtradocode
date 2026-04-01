@@ -95,7 +95,7 @@ export function FallbackPermissionRequest({
               value: 'yes-dont-ask-again',
             },
             {
-              label: `No, and tell Claude what to do differently (${chalk.bold.hex(getTheme().warning)('esc')})`,
+              label: `No, and tell OpenCarbo what to do differently (${chalk.bold.hex(getTheme().warning)('esc')})`,
               value: 'no',
             },
           ]}

@@ -1,4 +1,4 @@
-import type { TextBlock } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { TextBlock } from '../../types/anthropic.js'
 import { Box } from 'ink'
 import * as React from 'react'
 import { z } from 'zod'
@@ -82,7 +82,7 @@ export const ArchitectTool = {
     )
 
     if (lastResponse.type !== 'assistant') {
-      throw new Error('Invalid response from Claude API')
+      throw new Error('Invalid response from OpenAI API')
     }
 
     const data = lastResponse.message.content.filter(_ => _.type === 'text')

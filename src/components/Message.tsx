@@ -5,11 +5,12 @@ import type {
   ContentBlock,
   DocumentBlockParam,
   ImageBlockParam,
+  RedactedThinkingBlock,
   TextBlockParam,
   ThinkingBlockParam,
   ToolResultBlockParam,
   ToolUseBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+} from '../types/anthropic.js'
 import { Tool } from '../Tool.js'
 import { logError } from '../utils/log.js'
 import { UserToolResultMessage } from './messages/UserToolResultMessage/UserToolResultMessage.js'
@@ -56,6 +57,7 @@ export function Message({
     return (
       <Box flexDirection="column" width="100%">
         {message.message.content.map((_, index) => (
+          // @ts-ignore
           <AssistantMessage
             key={index}
             param={_}
@@ -108,6 +110,7 @@ function UserMessage({
   param,
   options: { verbose },
 }: {
+  key?: React.Key
   message: UserMessage
   messages: Message[]
   addMargin: boolean
@@ -155,6 +158,7 @@ function AssistantMessage({
   shouldShowDot,
   width,
 }: {
+  key?: React.Key
   param:
     | ContentBlock
     | TextBlockParam
@@ -162,6 +166,7 @@ function AssistantMessage({
     | ThinkingBlockParam
     | ToolUseBlockParam
     | ToolResultBlockParam
+    | RedactedThinkingBlock
   costUSD: number
   durationMs: number
   addMargin: boolean

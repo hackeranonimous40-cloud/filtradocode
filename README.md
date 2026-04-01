@@ -1,58 +1,66 @@
-# Claude Code (Research Preview) - 0.2.8 with extracted source maps
+# OpenCarbo - AI Coding Assistant
 
-# NOTE: I'm not working on this repo, this is the original source. Fork is at https://github.com/dnakov/anon-kode
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-brightgreen?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
 
+OpenCarbo is an agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster by executing routine tasks, explaining complex code, and handling git workflows - all through natural language commands.
 
-![](https://img.shields.io/badge/Node.js-18%2B-brightgreen?style=flat-square)
+**Powered by OpenAI/OpenRouter** - Uses free models from OpenRouter for function calling.
 
-Claude Code is an agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster by executing routine tasks, explaining complex code, and handling git workflows - all through natural language commands.
-
-Some of its key capabilities include:
+## Features
 
 - Edit files and fix bugs across your codebase
 - Answer questions about your code's architecture and logic
 - Execute and fix tests, lint, and other commands
-- Search through git history, resolve merge conflicts, and create commits and PRs
+- Search through git history, resolve merge conflicts, and create commits
+- 16 built-in tools: Bash, File Edit, Glob, Grep, LS, Read, Notebook, Agent, etc.
 
-**Learn more in the [official documentation](https://docs.anthropic.com/en/docs/agents/claude-code/introduction)**.
+## Quick Start
 
-## Get started
+```bash
+# Install dependencies
+bun install
 
-<ol>
-  <li>
-    Run the following command in your terminal: <br />
-    <code>npm install -g @anthropic-ai/claude-code</code>
-  </li>
-  <li>
-    Navigate to your project directory and run <code>claude</code>
-  </li>
-  <li>
-    Complete the one-time OAuth process with your Anthropic Console account.
-  </li>
-</ol>
+# Set your API key (OpenRouter - free tier available)
+export OPENAI_API_KEY="your-key"
+export OPENAI_BASE_URL="https://openrouter.ai/api/v1"
+export OPENAI_MODEL="anthropic/claude-3-haiku"
 
-### Research Preview
+# Run interactively
+bun run start
 
-We're launching Claude Code as a beta product in research preview to learn directly from developers about their experiences collaborating with AI agents. Our aim is to learn more about how developers prefer to collaborate with AI tools, which development workflows benefit most from working with the agent, and how we can make the agent experience more intuitive.
+# Or with a single prompt
+bun run start -p "Explain src/Tool.ts"
+```
 
-This is an early version of the product experience, and it's likely to evolve as we learn more about developer preferences. Claude Code is an early look into what's possible with agentic coding, and we know there are areas to improve. We plan to enhance tool execution reliability, support for long-running commands, terminal rendering, and Claude's self-knowledge of its capabilities -- as well as many other product experiences -- over the coming weeks.
+## Environment Variables
 
-### Reporting Bugs
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OPENAI_API_KEY` | API key for OpenRouter/OpenAI | Required |
+| `OPENAI_BASE_URL` | API base URL | OpenRouter |
+| `OPENAI_MODEL` | Main model (with function calling) | claude-3-haiku |
+| `OPENAI_SMALL_MODEL` | Fast model for simple tasks | nemotron-nano |
 
-We welcome feedback during this beta period. Use the `/bug` command to report issues directly within Claude Code, or file a [GitHub issue](https://github.com/anthropics/claude-code/issues).
+## Free Models on OpenRouter
 
-### Data collection, usage, and retention
+These models support function calling and work with OpenCarbo:
 
-When you use Claude Code, we collect feedback, which includes usage data (such as code acceptance or rejections), associated conversation data, and user feedback submitted via the `/bug` command.
+- `anthropic/claude-3-haiku` - Fast, capable
+- `anthropic/claude-3.5-haiku` - Better reasoning
+- `google/gemini-2.0-flash-exp` - Very fast
+- `meta-llama/llama-3-8b-instruct` - Open source
+- `mistralai/mistral-7b-instruct` - Good balance
 
-#### How we use your data
+## Slash Commands
 
-We may use feedback to improve our products and services, but we will not train generative models using your feedback from Claude Code. Given their potentially sensitive nature, we store user feedback transcripts for only 30 days.
+- `/help` - Show help
+- `/clear` - Clear conversation
+- `/compact` - Compact context
+- `/config` - Open config panel
+- `/cost` - Show session cost
+- `/init` - Initialize CLAUDE.md
 
-If you choose to send us feedback about Claude Code, such as transcripts of your usage, Anthropic may use that feedback to debug related issues and improve Claude Code's functionality (e.g., to reduce the risk of similar bugs occurring in the future).
+## License
 
-### Privacy safeguards
-
-We have implemented several safeguards to protect your data, including limited retention periods for sensitive information, restricted access to user session data, and clear policies against using feedback for model training.
-
-For full details, please review our [Commercial Terms of Service](https://www.anthropic.com/legal/commercial-terms) and [Privacy Policy](https://www.anthropic.com/legal/privacy).
+MIT - See LICENSE.md

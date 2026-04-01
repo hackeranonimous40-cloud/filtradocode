@@ -24,6 +24,11 @@ export type SelectOptionProps = {
    * Option label.
    */
   readonly children: ReactNode
+
+  /**
+   * React key for list rendering.
+   */
+  readonly key?: React.Key
 }
 
 export function SelectOption({
@@ -32,7 +37,7 @@ export function SelectOption({
   smallPointer,
   children,
 }: SelectOptionProps) {
-  const { styles } = useComponentTheme<Theme>('Select')
+  const { styles } = useComponentTheme('Select') as { styles: Record<string, (...args: unknown[]) => Record<string, unknown>> }
 
   return (
     <Box {...styles.option({ isFocused })}>

@@ -1,3 +1,4 @@
+import type * as React from 'react'
 import type { Message } from './query.js'
 
 let getMessages: () => Message[] = () => []

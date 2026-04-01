@@ -140,7 +140,6 @@ export function useTextInput({
       onMessage?.(true, CLIPBOARD_ERROR_MESSAGE)
       maybeClearImagePasteErrorTimeout()
       setImagePasteErrorTimeout(
-        // @ts-expect-error: Bun is overloading types here, but we're using the NodeJS runtime
         setTimeout(() => {
           onMessage?.(false)
         }, 4000),
@@ -217,9 +216,9 @@ export function useTextInput({
     switch (true) {
       case key.escape:
         return handleEscape
-      case key.leftArrow && (key.ctrl || key.meta || key.fn):
+      case key.leftArrow && (key.ctrl || key.meta || (key as any).fn):
         return () => cursor.prevWord()
-      case key.rightArrow && (key.ctrl || key.meta || key.fn):
+      case key.rightArrow && (key.ctrl || key.meta || (key as any).fn):
         return () => cursor.nextWord()
       case key.backspace:
         return key.meta
@@ -229,9 +228,9 @@ export function useTextInput({
         return key.meta ? () => cursor.deleteToLineEnd() : () => cursor.del()
       case key.ctrl:
         return handleCtrl
-      case key.home:
+      case (key as any).home:
         return () => cursor.startOfLine()
-      case key.end:
+      case (key as any).end:
         return () => cursor.endOfLine()
       case key.pageDown:
         return () => cursor.endOfLine()

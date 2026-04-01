@@ -51,7 +51,7 @@ export function toolUseConfirmGetPrefix(
   return (
     (toolUseConfirm.commandPrefix &&
       !toolUseConfirm.commandPrefix.commandInjectionDetected &&
-      toolUseConfirm.commandPrefix.commandPrefix) ||
+      (toolUseConfirm.commandPrefix as { commandPrefix: string }).commandPrefix) ||
     null
   )
 }
@@ -86,7 +86,7 @@ export function PermissionRequest({
   const toolName = toolUseConfirm.tool.userFacingName(
     toolUseConfirm.input as never,
   )
-  useNotifyAfterTimeout(`Claude needs your permission to use ${toolName}`)
+  useNotifyAfterTimeout(`OpenCarbo needs your permission to use ${toolName}`)
 
   const PermissionComponent = permissionComponentForTool(toolUseConfirm.tool)
 

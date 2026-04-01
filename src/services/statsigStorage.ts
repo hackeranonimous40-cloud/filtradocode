@@ -1,3 +1,4 @@
+// @ts-ignore - @statsig/client-core may not be installed
 import { StorageProvider } from '@statsig/client-core'
 import * as fs from 'fs'
 import * as path from 'path'

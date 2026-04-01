@@ -1,4 +1,4 @@
-import { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import { ToolResultBlockParam } from '../../../types/anthropic.js'
 import * as React from 'react'
 import { Tool } from '../../../Tool.js'
 import { Message, UserMessage } from '../../../query.js'

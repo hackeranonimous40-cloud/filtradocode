@@ -4,6 +4,7 @@ import { getTheme } from '../utils/theme.js'
 import { gte } from 'semver'
 import { useEffect, useState } from 'react'
 import { isAutoUpdaterDisabled } from '../utils/config.js'
+import { MACRO } from '../constants/macros.js'
 import {
   AutoUpdaterResult,
   getLatestVersion,

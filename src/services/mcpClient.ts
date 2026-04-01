@@ -15,9 +15,11 @@ import { getCwd } from '../utils/state.js'
 import { safeParseJSON } from '../utils/json.js'
 import {
   ImageBlockParam,
+  ImageBlockParamSource,
   MessageParam,
+  TextBlock,
   ToolResultBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+} from '../types/anthropic.js'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
@@ -330,7 +332,7 @@ export const getClients = memoize(async (): Promise<WrappedClient[]> => {
   return await Promise.all(
     Object.entries(allServers).map(async ([name, serverRef]) => {
       try {
-        const client = await connectToServer(name, serverRef)
+        const client = await connectToServer(name, serverRef as McpServerConfig)
         logEvent('tengu_mcp_server_connection_succeeded', {})
         return { name, client, type: 'connected' as const }
       } catch (error) {
@@ -468,16 +470,16 @@ async function callMCPTool({
     return result.content.map(item => {
       if (item.type === 'image') {
         return {
-          type: 'image',
+          type: 'image' as const,
           source: {
-            type: 'base64',
-            data: String(item.data),
-            media_type: item.mimeType as ImageBlockParam.Source['media_type'],
+            type: 'base64' as const,
+            data: String((item as { data: string }).data),
+            media_type: (item as { mimeType: string }).mimeType as ImageBlockParamSource['media_type'],
           },
-        }
+        } as ImageBlockParam
       }
-      return item
-    })
+      return item as TextBlock
+    }) as (TextBlock | ImageBlockParam)[]
   }
 
   throw Error(`Unexpected response format from tool ${tool}`)
@@ -540,9 +542,9 @@ export async function runCommand(
             : {
                 type: 'image',
                 source: {
-                  data: String(message.content.data),
-                  media_type: message.content
-                    .mimeType as ImageBlockParam.Source['media_type'],
+                  data: String((message.content as { data: string }).data),
+                  media_type: (message.content as { mimeType: string })
+                    .mimeType as ImageBlockParamSource['media_type'],
                   type: 'base64',
                 },
               },

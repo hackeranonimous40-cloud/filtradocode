@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import type * as React from 'react'
 import { hasPermissionsToUseTool } from '../permissions.js'
 import { logEvent } from '../services/statsig.js'
 import { BashTool, inputSchema } from '../tools/BashTool/BashTool.js'

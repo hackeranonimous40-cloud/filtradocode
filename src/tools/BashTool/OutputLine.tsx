@@ -24,6 +24,7 @@ export function OutputLine({
   verbose,
   isError,
 }: {
+  key?: React.Key
   content: string
   lines: number
   verbose: boolean

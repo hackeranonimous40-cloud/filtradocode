@@ -15,6 +15,7 @@ import { getTheme } from './utils/theme.js'
 import { RELEASE_NOTES } from './constants/releaseNotes.js'
 import { gt } from 'semver'
 import { isDirEmpty } from './utils/file.js'
+import { MACRO } from './constants/macros.js'
 
 // Function to mark onboarding as complete
 export function markProjectOnboardingComplete(): void {
@@ -92,6 +93,7 @@ export default function ProjectOnboarding({
 
               if (isWorkspaceDirEmpty) {
                 items.push(
+                  // @ts-ignore
                   <OrderedList.Item key="workspace">
                     <Text color={theme.secondaryText}>
                       Ask Claude to create a new app or clone a repository.
@@ -101,6 +103,7 @@ export default function ProjectOnboarding({
               }
               if (needsClaudeMd) {
                 items.push(
+                  // @ts-ignore
                   <OrderedList.Item key="claudemd">
                     <Text color={theme.secondaryText}>
                       Run <Text color={theme.text}>/init</Text> to create a
@@ -112,6 +115,7 @@ export default function ProjectOnboarding({
 
               if (showTerminalTip) {
                 items.push(
+                  // @ts-ignore
                   <OrderedList.Item key="terminal">
                     <Text color={theme.secondaryText}>
                       Run <Text color={theme.text}>/terminal-setup</Text>
@@ -122,6 +126,7 @@ export default function ProjectOnboarding({
               }
 
               items.push(
+                // @ts-ignore
                 <OrderedList.Item key="questions">
                   <Text color={theme.secondaryText}>
                     Ask Claude questions about your codebase.
@@ -130,6 +135,7 @@ export default function ProjectOnboarding({
               )
 
               items.push(
+                // @ts-ignore
                 <OrderedList.Item key="changes">
                   <Text color={theme.secondaryText}>
                     Ask Claude to implement changes to your codebase.
@@ -155,6 +161,7 @@ export default function ProjectOnboarding({
             </Box>
             <Box flexDirection="column" marginLeft={1}>
               {releaseNotesToShow.map((note, noteIndex) => (
+                // @ts-ignore
                 <Text key={noteIndex} color={getTheme().secondaryText}>
                   • {note}
                 </Text>

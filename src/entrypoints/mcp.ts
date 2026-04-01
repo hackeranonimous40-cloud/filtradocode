@@ -7,7 +7,8 @@ import {
   ListToolsResultSchema,
   ToolSchema,
 } from '@modelcontextprotocol/sdk/types.js'
-import { z } from 'zod'
+import { z, ZodTypeAny } from 'zod'
+import { MACRO } from '../constants/macros.js'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 import { AgentTool } from '../tools/AgentTool/AgentTool.js'
 import { hasPermissionsToUseTool } from '../permissions.js'
@@ -26,7 +27,7 @@ import { Command } from '../commands.js'
 import review from '../commands/review.js'
 import { lastX } from '../utils/generators.js'
 
-type ToolInput = z.infer<typeof ToolSchema.shape.inputSchema>
+type ToolInput = Record<string, unknown>
 
 const state: {
   readFileTimestamps: Record<string, number>
@@ -63,7 +64,7 @@ export async function startMCPServer(cwd: string): Promise<void> {
 
   server.setRequestHandler(
     ListToolsRequestSchema,
-    async (): Promise<Zod.infer<typeof ListToolsResultSchema>> => {
+    async (): Promise<{ tools: { name: string; description: string; inputSchema: ToolInput }[] }> => {
       const tools = await Promise.all(
         MCP_TOOLS.map(async tool => ({
           ...tool,
@@ -80,7 +81,7 @@ export async function startMCPServer(cwd: string): Promise<void> {
 
   server.setRequestHandler(
     CallToolRequestSchema,
-    async (request): Promise<Zod.infer<typeof CallToolResultSchema>> => {
+    async (request): Promise<{ content: { type: string; text: string }[]; isError?: boolean }> => {
       const { name, arguments: args } = request.params
       const tool = MCP_TOOLS.find(_ => _.name === name)
       if (!tool) {
@@ -111,7 +112,7 @@ export async function startMCPServer(cwd: string): Promise<void> {
         )
         if (validationResult && !validationResult.result) {
           throw new Error(
-            `Tool ${name} input is invalid: ${validationResult.message}`,
+            `Tool ${name} input is invalid: ${(validationResult as { message: string }).message}`,
           )
         }
         const result = tool.call(

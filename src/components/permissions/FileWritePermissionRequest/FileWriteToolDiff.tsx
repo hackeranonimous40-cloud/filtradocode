@@ -65,6 +65,7 @@ export function FileWriteToolDiff({
             />
           )),
           i => (
+            // @ts-ignore
             <Text color={getTheme().secondaryText} key={`ellipsis-${i}`}>
               ...
             </Text>

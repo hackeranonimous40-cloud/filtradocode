@@ -25,7 +25,7 @@ export const inputSchema = z.strictObject({
     .describe('Optional timeout in milliseconds (max 600000)'),
 })
 
-type In = typeof inputSchema
+type In = z.infer<typeof inputSchema>
 export type Out = {
   stdout: string
   stdoutLines: number // Total number of lines in original stdout, even if `stdout` is now truncated

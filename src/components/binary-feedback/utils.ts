@@ -1,4 +1,4 @@
-import { TextBlock, ToolUseBlock } from '@anthropic-ai/sdk/resources/index.mjs'
+import { ContentBlock, TextBlock, ToolUseBlock } from '../../types/anthropic.js'
 import { AssistantMessage, BinaryFeedbackResult } from '../../query.js'
 import { MAIN_QUERY_TEMPERATURE } from '../../services/claude.js'
 import { getDynamicConfig, logEvent } from '../../services/statsig.js'
@@ -25,7 +25,7 @@ async function getBinaryFeedbackStatsigConfig(): Promise<BinaryFeedbackConfig> {
 }
 
 function getMessageBlockSequence(m: AssistantMessage) {
-  return m.message.content.map(cb => {
+  return (m.message.content as ContentBlock[]).map(cb => {
     if (cb.type === 'text') return 'text'
     if (cb.type === 'tool_use') return cb.name
     return cb.type // Handle other block types like 'thinking' or 'redacted_thinking'
@@ -163,10 +163,10 @@ export function messagePairValidForBinaryFeedback(
 
   // Ignore thinking blocks, on the assumption that users don't find them very relevant
   // compared to other content types
-  const nonThinkingBlocks1 = m1.message.content.filter(
+  const nonThinkingBlocks1 = (m1.message.content as ContentBlock[]).filter(
     b => b.type !== 'thinking' && b.type !== 'redacted_thinking',
   )
-  const nonThinkingBlocks2 = m2.message.content.filter(
+  const nonThinkingBlocks2 = (m2.message.content as ContentBlock[]).filter(
     b => b.type !== 'thinking' && b.type !== 'redacted_thinking',
   )
   const hasToolUse =

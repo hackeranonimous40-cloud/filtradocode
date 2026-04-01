@@ -1,4 +1,5 @@
 import React from 'react'
+import type * as ReactNS from 'react'
 import { Text, useInput } from 'ink'
 import chalk from 'chalk'
 import { useTextInput } from '../hooks/useTextInput.js'
@@ -138,7 +139,7 @@ export default function TextInput({
   disableCursorMovementForUpDownKeys = false,
   cursorOffset,
   onChangeCursorOffset,
-}: Props): JSX.Element {
+}: Props): ReactNS.ReactElement {
   const { onInput, renderedValue } = useTextInput({
     value: originalValue,
     onChange,

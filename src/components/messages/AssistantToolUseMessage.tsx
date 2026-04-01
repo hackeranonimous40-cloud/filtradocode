@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink'
 import React from 'react'
 import { logError } from '../../utils/log.js'
-import { ToolUseBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import { ToolUseBlockParam } from '../../types/anthropic.js'
 import { Tool } from '../../Tool.js'
 import { Cost } from '../Cost.js'
 import { ToolUseLoader } from '../ToolUseLoader.js'

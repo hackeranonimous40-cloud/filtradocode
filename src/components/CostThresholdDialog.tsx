@@ -28,7 +28,7 @@ export function CostThresholdDialog({ onDone }: Props): React.ReactNode {
           You&apos;ve spent $5 on the Anthropic API this session.
         </Text>
         <Text>Learn more about how to monitor your spending:</Text>
-        <Link url="https://docs.anthropic.com/s/claude-code-cost" />
+        <Link url="https://docs.anthropic.com/s/OpenCarbo-cost" />
       </Box>
       <Box>
         <Select

@@ -1,5 +1,6 @@
 import { memoize } from 'lodash-es'
 import { checkGate } from '../services/statsig.js'
+export { checkGate } from '../services/statsig.js'
 import {
   GATE_TOKEN_EFFICIENT_TOOLS,
   BETA_HEADER_TOKEN_EFFICIENT_TOOLS,

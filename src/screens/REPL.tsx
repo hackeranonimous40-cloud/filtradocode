@@ -1,4 +1,4 @@
-import { ToolUseBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import { ToolUseBlockParam } from '../types/anthropic.js'
 import { Box, Newline, Static } from 'ink'
 import ProjectOnboarding, {
   markProjectOnboardingComplete,
@@ -225,6 +225,7 @@ export function REPL({
           messageLogName,
           tools,
           verbose,
+          dangerouslySkipPermissions: false,
           slowAndCapableModel: model,
           maxThinkingTokens: 0,
         },
@@ -304,7 +305,7 @@ export function REPL({
   ) {
     setMessages(oldMessages => [...oldMessages, ...newMessages])
 
-    // Mark onboarding as complete when any user message is sent to Claude
+    // Mark onboarding as complete when any user message is sent to OpenCarbo
     markProjectOnboardingComplete()
 
     // The last message is an assistant message if the user input was a bash command,
@@ -541,10 +542,11 @@ export function REPL({
   return (
     <>
       <Static
+        // @ts-ignore
         key={`static-messages-${forkNumber}`}
         items={messagesJSX.filter(_ => _.type === 'static')}
       >
-        {_ => _.jsx}
+        {(_ => _.jsx) as any}
       </Static>
       {messagesJSX.filter(_ => _.type === 'transient').map(_ => _.jsx)}
       <Box

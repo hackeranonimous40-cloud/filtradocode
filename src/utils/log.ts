@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto'
 import envPaths from 'env-paths'
 import { promises as fsPromises } from 'fs'
 import type { LogOption, SerializedMessage } from '../types/logs.js'
+import { MACRO } from '../constants/macros.js'
 
 const IN_MEMORY_ERROR_LOG: Array<{
   error: string
@@ -15,7 +16,7 @@ const MAX_IN_MEMORY_ERRORS = 100 // Limit to prevent memory issues
 
 export const SESSION_ID = randomUUID()
 
-const paths = envPaths('claude-cli')
+const paths = envPaths('OpenCarbo')
 
 function getProjectDir(cwd: string): string {
   return cwd.replace(/[^a-zA-Z0-9]/g, '-')
@@ -183,10 +184,10 @@ export async function loadLogList(
         fullPath,
         messages,
         value: i, // hack: overwritten after sorting, right below this
-        created: parseISOString(firstMessage?.timestamp || date),
+        created: parseISOString((firstMessage?.timestamp || date) as string),
         modified: lastMessage?.timestamp
-          ? parseISOString(lastMessage.timestamp)
-          : parseISOString(date),
+          ? parseISOString(String(lastMessage.timestamp))
+          : parseISOString(String(date)),
         firstPrompt:
           firstPrompt.split('\n')[0]?.slice(0, 50) +
             (firstPrompt.length > 50 ? '…' : '') || 'No prompt',

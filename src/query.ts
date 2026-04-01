@@ -1,8 +1,10 @@
 import {
   Message as APIAssistantMessage,
   MessageParam,
+  TextBlock,
+  ImageBlockParam,
   ToolUseBlock,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+} from './types/anthropic.js'
 import { UUID } from 'crypto'
 import type { Tool, ToolUseContext } from './Tool.js'
 import {
@@ -450,13 +452,13 @@ async function* checkPermissionsAndCallTool(
             [
               {
                 type: 'tool_result',
-                content: result.resultForAssistant,
+                content: result.resultForAssistant as string | (TextBlock | ImageBlockParam)[],
                 tool_use_id: toolUseID,
               },
             ],
             {
               data: result.data,
-              resultForAssistant: result.resultForAssistant,
+              resultForAssistant: result.resultForAssistant as string | (TextBlock | ImageBlockParam)[],
             },
           )
           return
@@ -469,7 +471,7 @@ async function* checkPermissionsAndCallTool(
             toolUseID,
             siblingToolUseIDs,
             result.content,
-            result.normalizedMessages,
+            result.normalizedMessages as NormalizedMessage[],
             result.tools,
           )
       }

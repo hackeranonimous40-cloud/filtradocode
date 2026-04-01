@@ -3,7 +3,7 @@ import { memoize } from 'lodash-es'
 import { join } from 'path'
 import { homedir } from 'os'
 
-// Base directory for all Claude Code data files (except config.json for backwards compatibility)
+// Base directory for all OpenCarbo data files (except config.json for backwards compatibility)
 export const CLAUDE_BASE_DIR =
   process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude')
 

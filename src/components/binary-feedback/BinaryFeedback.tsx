@@ -42,7 +42,7 @@ export function BinaryFeedback({
     },
     [m1, m2, resolve],
   )
-  useNotifyAfterTimeout('Claude needs your input on a response comparison')
+  useNotifyAfterTimeout('OpenCarbo needs your input on a response comparison')
   return (
     <BinaryFeedbackView
       debug={debug}

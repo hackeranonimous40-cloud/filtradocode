@@ -18,12 +18,14 @@ import { NO_CONTENT_MESSAGE } from '../services/claude.js'
 import {
   ImageBlockParam,
   TextBlockParam,
+  TextBlock,
   ToolResultBlockParam,
   ToolUseBlockParam,
+  ToolUseBlock,
   Message as APIMessage,
   ContentBlockParam,
   ContentBlock,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+} from '../types/anthropic.js'
 import { setCwd } from './state.js'
 import { getCwd } from './state.js'
 import chalk from 'chalk'
@@ -31,7 +33,6 @@ import * as React from 'react'
 import { UserBashInputMessage } from '../components/messages/UserBashInputMessage.js'
 import { Spinner } from '../components/Spinner.js'
 import { BashTool } from '../tools/BashTool/BashTool.js'
-import { ToolUseBlock } from '@anthropic-ai/sdk/resources/index.mjs'
 
 export const INTERRUPT_MESSAGE = '[Request interrupted by user]'
 export const INTERRUPT_MESSAGE_FOR_TOOL_USE =
@@ -72,7 +73,7 @@ function baseCreateAssistantMessage(
         cache_creation_input_tokens: 0,
         cache_read_input_tokens: 0,
       },
-      content,
+      content: content as (TextBlock | ToolUseBlock)[],
     },
     ...extra,
   }
@@ -211,7 +212,7 @@ export async function processUserInput(
         command: input,
       })
       if (!validationResult.result) {
-        return [userMessage, createAssistantMessage(validationResult.message)]
+        return [userMessage, createAssistantMessage((validationResult as { result: false; message: string }).message)]
       }
       const { data } = await lastX(BashTool.call({ command: input }, context))
       return [
@@ -273,8 +274,7 @@ export async function processUserInput(
       newMessages[0]!.type === 'user' &&
       newMessages[1]!.type === 'assistant' &&
       typeof newMessages[1]!.message.content === 'string' &&
-      // @ts-expect-error: TODO: this is probably a bug
-      newMessages[1]!.message.content.startsWith('Unknown command:')
+      (newMessages[1]!.message.content as string).startsWith('Unknown command:')
     ) {
       logEvent('tengu_input_slash_invalid', { input })
       return newMessages
@@ -356,7 +356,7 @@ async function getMessagesForSlashCommand(
         <command-args>${args}</command-args>`)
 
         try {
-          const result = await command.call(args, context)
+          const result = await command.call(args, context as any)
 
           return [
             userMessage,

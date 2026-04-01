@@ -6,11 +6,12 @@ import {
 } from '../utils/messages.js'
 import { getCwd } from '../utils/state.js'
 import { PRODUCT_NAME } from './product.js'
+import { MACRO } from './macros.js'
 import { BashTool } from '../tools/BashTool/BashTool.js'
 import { getSlowAndCapableModel } from '../utils/model.js'
 
 export function getCLISyspromptPrefix(): string {
-  return `You are ${PRODUCT_NAME}, Anthropic's official CLI for Claude.`
+  return `You are ${PRODUCT_NAME}, an AI coding assistant.`
 }
 
 export async function getSystemPrompt(): Promise<string[]> {
@@ -143,7 +144,7 @@ Model: ${model}
 
 export async function getAgentPrompt(): Promise<string[]> {
   return [
-    `You are an agent for ${PRODUCT_NAME}, Anthropic's official CLI for Claude. Given the user's prompt, you should use the tools available to you to answer the user's question.
+    `You are an agent for ${PRODUCT_NAME}, an AI coding assistant. Given the user's prompt, you should use the tools available to you to answer the user's question.
 
 Notes:
 1. IMPORTANT: You should be concise, direct, and to the point, since your responses will be displayed on a command line interface. Answer the user's question directly, without elaboration, explanation, or details. One word answers are best. Avoid introductions, conclusions, and explanations. You MUST avoid text before/after your response, such as "The answer is <answer>.", "Here is the content of the file..." or "Based on the information provided, the answer is..." or "Here is what I will do next...".

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { PRODUCT_NAME } from '../constants/product.js'
+import { MACRO } from '../constants/macros.js'
 import { Box, Newline, Text, useInput } from 'ink'
 import {
   getGlobalConfig,
@@ -140,7 +141,7 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
       <Box flexDirection="column" width={70}>
         <OrderedList>
           <OrderedList.Item>
-            <Text>Claude Code is currently in research preview</Text>
+            <Text>OpenCarbo is currently in research preview</Text>
             <Text color={theme.secondaryText} wrap="wrap">
               This beta version may have limitations or unexpected behaviors.
               <Newline />
@@ -149,9 +150,9 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
             </Text>
           </OrderedList.Item>
           <OrderedList.Item>
-            <Text>Claude can make mistakes</Text>
+            <Text>OpenCarbo can make mistakes</Text>
             <Text color={theme.secondaryText} wrap="wrap">
-              You should always review Claude&apos;s responses, especially when
+              You should always review OpenCarbo&apos;s responses, especially when
               <Newline />
               running code.
               <Newline />
@@ -164,7 +165,7 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
             <Text color={theme.secondaryText} wrap="wrap">
               For more details see:
               <Newline />
-              <Link url="https://docs.anthropic.com/s/claude-code-security" />
+              <Link url="https://docs.anthropic.com/s/OpenCarbo-security" />
             </Text>
           </OrderedList.Item>
         </OrderedList>

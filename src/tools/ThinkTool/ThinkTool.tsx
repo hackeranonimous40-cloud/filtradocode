@@ -52,4 +52,8 @@ export const ThinkTool = {
   },
 
   renderResultForAssistant: () => 'Your thought has been logged.',
+
+  renderToolResultMessage() {
+    return null
+  },
 } satisfies Tool<typeof thinkToolSchema>

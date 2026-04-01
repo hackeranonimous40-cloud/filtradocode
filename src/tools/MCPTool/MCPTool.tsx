@@ -69,11 +69,12 @@ export const MCPTool = {
                 </Box>
               )
             }
-            const lines = item.text.split('\n').length
+            const lines = (item as { text: string }).text.split('\n').length
             return (
+              // @ts-ignore
               <OutputLine
                 key={i}
-                content={item.text}
+                content={(item as { text: string }).text}
                 lines={lines}
                 verbose={verbose}
               />

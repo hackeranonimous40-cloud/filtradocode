@@ -89,4 +89,8 @@ export const StickerRequestTool: Tool = {
   ),
 
   renderResultForAssistant: (content: string) => content,
+
+  renderToolResultMessage() {
+    return null
+  },
 }

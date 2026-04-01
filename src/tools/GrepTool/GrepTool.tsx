@@ -34,7 +34,7 @@ const inputSchema = z.strictObject({
 
 const MAX_RESULTS = 100
 
-type Input = typeof inputSchema
+type Input = z.infer<typeof inputSchema>
 type Output = {
   durationMs: number
   numFiles: number

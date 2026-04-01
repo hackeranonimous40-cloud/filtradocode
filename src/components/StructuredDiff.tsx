@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import { wrapText } from '../utils/format.js'
 
 type Props = {
+  key?: string
   patch: Hunk
   dim: boolean
   width: number
@@ -66,6 +67,7 @@ function formatDiff(
       switch (type) {
         case 'add':
           return (
+            // @ts-ignore
             <Text key={key}>
               <LineNumber
                 i={lineIndex === 0 ? i : undefined}
@@ -84,6 +86,7 @@ function formatDiff(
           )
         case 'remove':
           return (
+            // @ts-ignore
             <Text key={key}>
               <LineNumber
                 i={lineIndex === 0 ? i : undefined}
@@ -102,6 +105,7 @@ function formatDiff(
           )
         case 'nochange':
           return (
+            // @ts-ignore
             <Text key={key}>
               <LineNumber
                 i={lineIndex === 0 ? i : undefined}

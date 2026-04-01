@@ -1,4 +1,4 @@
-import { ImageBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import { ImageBlockParam, ImageBlockParamSource } from '../../types/anthropic.js'
 import { existsSync, readFileSync, statSync } from 'fs'
 import { Box, Text } from 'ink'
 import * as path from 'path'
@@ -252,7 +252,7 @@ export const FileReadTool = {
     }
   | {
       type: 'image'
-      file: { base64: string; type: ImageBlockParam.Source['media_type'] }
+      file: { base64: string; type: ImageBlockParamSource['media_type'] }
     }
 >
 
@@ -264,13 +264,13 @@ function createImageResponse(
   ext: string,
 ): {
   type: 'image'
-  file: { base64: string; type: ImageBlockParam.Source['media_type'] }
+  file: { base64: string; type: ImageBlockParamSource['media_type'] }
 } {
   return {
     type: 'image',
     file: {
       base64: buffer.toString('base64'),
-      type: `image/${ext.slice(1)}` as ImageBlockParam.Source['media_type'],
+      type: `image/${ext.slice(1)}` as ImageBlockParamSource['media_type'],
     },
   }
 }
@@ -280,14 +280,19 @@ async function readImage(
   ext: string,
 ): Promise<{
   type: 'image'
-  file: { base64: string; type: ImageBlockParam.Source['media_type'] }
+  file: { base64: string; type: ImageBlockParamSource['media_type'] }
 }> {
   try {
     const stats = statSync(filePath)
     const sharp = (
       (await import('sharp')) as unknown as { default: typeof import('sharp') }
     ).default
-    const image = sharp(readFileSync(filePath))
+    // @ts-ignore
+    const image = sharp(readFileSync(filePath)) as unknown as {
+      metadata: () => Promise<{ width?: number; height?: number }>
+      jpeg: (opts: { quality: number }) => { toBuffer: () => Promise<Buffer> }
+      resize: (w: number, h: number, opts: { fit: string; withoutEnlargement: boolean }) => { toBuffer: () => Promise<Buffer> }
+    }
     const metadata = await image.metadata()
 
     if (!metadata.width || !metadata.height) {

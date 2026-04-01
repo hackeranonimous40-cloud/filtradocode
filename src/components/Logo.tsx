@@ -44,13 +44,13 @@ export function Logo({
       >
         <Text>
           <Text color={theme.claude}>✻</Text> Welcome to{' '}
-          <Text bold>{PRODUCT_NAME}</Text> <Text>research preview!</Text>
+          <Text bold>{PRODUCT_NAME}</Text> <Text>!</Text>
         </Text>
         <>
           <Box paddingLeft={2} flexDirection="column" gap={1}>
             <Text color={theme.secondaryText} italic>
               /help for help
-              {process.env.USER_TYPE === 'ant' && <> · https://go/claude-cli</>}
+              {process.env.USER_TYPE === 'ant' && <> · https://go/OpenCarbo</>}
             </Text>
             <Text color={theme.secondaryText}>cwd: {getCwd()}</Text>
           </Box>

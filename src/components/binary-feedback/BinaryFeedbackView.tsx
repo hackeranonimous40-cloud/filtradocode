@@ -37,7 +37,7 @@ export function getOptions(): BinaryFeedbackOption[] {
       value: 'prefer-right',
     },
     {
-      label: `Neither, and tell Claude what to do differently (${chalk.bold.hex(getTheme().warning)('esc')})`,
+      label: `Neither, and tell OpenCarbo what to do differently (${chalk.bold.hex(getTheme().warning)('esc')})`,
       value: 'neither',
     },
   ]
@@ -94,7 +94,7 @@ export function BinaryFeedbackView({
       >
         <Box width="100%" justifyContent="space-between" paddingX={1}>
           <Text bold color={theme.permission}>
-            [ANT-ONLY] Help train Claude
+            [ANT-ONLY] Help train OpenCarbo
           </Text>
           <Text>
             <Link url={HELP_URL}>[?]</Link>

@@ -1,5 +1,6 @@
 import { Command } from '../commands.js'
 import { PRODUCT_NAME } from '../constants/product.js'
+import { MACRO } from '../constants/macros.js'
 import * as React from 'react'
 import { Box, Text, useInput } from 'ink'
 import { getTheme } from '../utils/theme.js'
@@ -15,7 +16,7 @@ export function Help({
   const theme = getTheme()
   const isInternal = process.env.USER_TYPE === 'ant'
   const moreHelp = isInternal
-    ? '[ANT-ONLY] For more help: go/claude-cli or #claude-cli-feedback'
+    ? '[ANT-ONLY] For more help: go/OpenCarbo or #OpenCarbo-feedback'
     : `Learn more at: ${MACRO.README_URL}`
 
   const filteredCommands = commands.filter(cmd => !cmd.isHidden)

@@ -21,7 +21,7 @@ import { getGitEmail } from './utils/user.js'
 /**
  * Find all CLAUDE.md files in the current working directory
  */
-export async function getClaudeFiles(): Promise<string | null> {
+export async function getOpenCarboFiles(): Promise<string | null> {
   const abortController = new AbortController()
   const timeout = setTimeout(() => abortController.abort(), 3000)
   try {
@@ -165,7 +165,7 @@ export const getContext = memoize(
       await Promise.all([
         getGitStatus(),
         dontCrawl ? Promise.resolve('') : getDirectoryStructure(),
-        dontCrawl ? Promise.resolve('') : getClaudeFiles(),
+        dontCrawl ? Promise.resolve('') : getOpenCarboFiles(),
         getReadme(),
       ])
     return {
@@ -180,7 +180,7 @@ export const getContext = memoize(
 )
 
 /**
- * Approximate directory structure, to orient Claude. Claude will start with this, then use
+ * Approximate directory structure, to orient OpenCarbo. OpenCarbo will start with this, then use
  * tools like LS and View to get more information.
  */
 export const getDirectoryStructure = memoize(
